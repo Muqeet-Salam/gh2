@@ -3,19 +3,18 @@ import os
 
 def handler(request):
     try:
-        # Load the JSON file from the same folder
+        # Load the data from JSON file in the same directory
         current_dir = os.path.dirname(os.path.abspath(__file__))
-        json_path = os.path.join(current_dir, "q-vercel-python.json")
+        json_file = os.path.join(current_dir, "q-vercel-python.json")
 
-        with open(json_path, "r") as f:
+        with open(json_file, "r") as f:
             data_list = json.load(f)
 
-        # Convert to dictionary for quick lookup
         data = {entry["name"]: entry["marks"] for entry in data_list}
 
-        # Get query parameters
-        query = request.get("queryStringParameters", {})
-        names = query.get("name")
+        # Extract query params
+        params = request.get("queryStringParameters", {})
+        names = params.get("name")
 
         if not names:
             return {
@@ -27,11 +26,10 @@ def handler(request):
                 }
             }
 
-        # Normalize to list if single name
+        # Ensure it's a list
         if isinstance(names, str):
             names = [names]
 
-        # Get marks in order
         marks = [data.get(name, 0) for name in names]
 
         return {
@@ -45,7 +43,6 @@ def handler(request):
         }
 
     except Exception as e:
-        # Catch any error and return
         return {
             "statusCode": 500,
             "body": json.dumps({"error": "Internal Server Error", "details": str(e)}),
@@ -55,4 +52,4 @@ def handler(request):
             }
         }
 
-handler.__name__ = "handler"
+handler.__name__ = "handler"  # VERY IMPORTANT for Vercel
