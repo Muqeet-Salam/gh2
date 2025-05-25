@@ -8,3 +8,7 @@ def handler(request):
             "Content-Type": "application/json"
         }
     }
+
+
+handler.__name__ = "handler"
+
