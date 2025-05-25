@@ -3,25 +3,20 @@ import os
 
 def handler(request):
     try:
-        print("Received request:", request)
-
-        # Get the absolute path to the JSON file
+        # Load the JSON file from the same folder
         current_dir = os.path.dirname(os.path.abspath(__file__))
         json_path = os.path.join(current_dir, "q-vercel-python.json")
 
-        # Load JSON data
         with open(json_path, "r") as f:
             data_list = json.load(f)
 
-        # Convert to dictionary
+        # Convert to dictionary for quick lookup
         data = {entry["name"]: entry["marks"] for entry in data_list}
-        print("Data dictionary:", data)
 
-        # Extract query params
-        query_params = request.get("queryStringParameters", {})
-        names = query_params.get("name")
+        # Get query parameters
+        query = request.get("queryStringParameters", {})
+        names = query.get("name")
 
-        # Handle missing names
         if not names:
             return {
                 "statusCode": 400,
@@ -32,13 +27,11 @@ def handler(request):
                 }
             }
 
-        # Normalize to list
+        # Normalize to list if single name
         if isinstance(names, str):
             names = [names]
 
-        print("Names:", names)
-
-        # Get marks
+        # Get marks in order
         marks = [data.get(name, 0) for name in names]
 
         return {
@@ -52,11 +45,10 @@ def handler(request):
         }
 
     except Exception as e:
-        # Print error and return 500
-        print("Error:", str(e))
+        # Catch any error and return
         return {
             "statusCode": 500,
-            "body": json.dumps({"error": "Internal server error", "details": str(e)}),
+            "body": json.dumps({"error": "Internal Server Error", "details": str(e)}),
             "headers": {
                 "Content-Type": "application/json",
                 "Access-Control-Allow-Origin": "*"
@@ -64,6 +56,3 @@ def handler(request):
         }
 
 handler.__name__ = "handler"
-
-
-
